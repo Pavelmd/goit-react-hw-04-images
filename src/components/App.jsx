@@ -1,6 +1,6 @@
 import css from './StyleContainer.module.css'
 import React from 'react';
-import { Component } from 'react';
+
 import { Searchbar } from './SearchBar/Searchbar';
 import { fetchImages } from './Api/fetchImages';
 import { ImageGallery } from './ImageGallery/ImageGallery';
@@ -10,34 +10,45 @@ import { Modal } from './Modal/Modal';
 
 
 
-export class App extends Component {
-  state = {
-    images: [],
-    isLoading: false,
-    currentSearch: '',
-    pageNr: 1,
-    modalOpen: false,
-    modalImg: '',
-    modalAlt: '',
-  };
+export const App =() =>  {
+  const[images, setImages] = useState([]);
+  const[isLoading, setIsLoading] = useState(false);
+  const[currentSearch, setCurrentSearch] = useState('');
+  const[pageNr, setPageNr] = useState(1);
+  const[modalOpen, setModalOpen] = useState(false);
+  const[modalImg, setModalImg] = useState('');
+  const[modalAlt, setModalAlt] = useState('');
+  // state = {
+  //   images: [],
+  //   isLoading: false,
+  //   currentSearch: '',
+  //   pageNr: 1,
+  //   modalOpen: false,
+  //   modalImg: '',
+  //   modalAlt: '',
+  // };
 
-  handleSubmit = async e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    this.setState({ isLoading: true });
+    setIsLoading(true);
     const inputForSearch = e.target.elements.inputForSearch;
     if (inputForSearch.value.trim() === '') {
       return;
     }
     const response = await fetchImages(inputForSearch.value, 1);
-    this.setState({
-      images: response,
-      isLoading: false,
-      currentSearch: inputForSearch.value,
-      pageNr: 1,
-    });
+    setImages(response);
+    setIsLoading(false);
+    setCurrentSearch(inputForSearch.value);
+    setPageNr(1)
+    // this.setState({
+    //   images: response,
+    //   isLoading: false,
+    //   currentSearch: inputForSearch.value,
+    //   pageNr: 1,
+    // });
   };
 
-  handleClickMore = async () => {
+  const handleClickMore = async () => {
     const response = await fetchImages(
       this.state.currentSearch,
       this.state.pageNr + 1
@@ -54,6 +65,7 @@ export class App extends Component {
       modalAlt: e.target.alt,
       modalImg: e.target.name,
     });
+    console.log(e.target);
   };
 
   handleModalClose = () => {
