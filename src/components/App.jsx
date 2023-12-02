@@ -1,5 +1,5 @@
 import css from './StyleContainer.module.css';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Searchbar } from './SearchBar/Searchbar';
 import { fetchImages } from './Api/fetchImages';
@@ -16,6 +16,7 @@ export const App = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImg, setModalImg] = useState('');
   const [modalAlt, setModalAlt] = useState('');
+  const [totalPages, setTotalPages] = useState(0);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -25,7 +26,9 @@ export const App = () => {
       return;
     }
     const response = await fetchImages(inputForSearch.value, 1);
-    setImages(response);
+    setTotalPages(Math.ceil(response.totalHits / 12));
+
+    setImages(response.hits);
     setIsLoading(false);
     setCurrentSearch(inputForSearch.value);
     setPageNr(2);
@@ -34,7 +37,9 @@ export const App = () => {
   const handleClickMore = async () => {
     setIsLoading({ isLoading: true });
     const response = await fetchImages(currentSearch, pageNr);
-    setImages([...images, ...response]);
+
+    setImages([...images, ...response.hits]);
+
     setIsLoading(false);
     setPageNr(pageNr + 1);
   };
@@ -51,15 +56,6 @@ export const App = () => {
     setModalImg('');
   };
 
-  useEffect(() => {
-    const handleKeyDown = event => {
-      if (event.code === 'Escape') {
-        handleModalClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-  }, []);
-
   return (
     <div className={css.container}>
       {isLoading && pageNr === 1 ? (
@@ -70,7 +66,9 @@ export const App = () => {
           <ImageGallery onImageClick={handleImageClick} images={images} />
 
           {isLoading && pageNr >= 2 ? <Loader /> : null}
-          {images.length > 0 ? <Button onClick={handleClickMore} /> : null}
+          {images.length > 0 && !isLoading && pageNr <= totalPages ? (
+            <Button onClick={handleClickMore} />
+          ) : null}
         </React.Fragment>
       )}
       {modalOpen ? (
