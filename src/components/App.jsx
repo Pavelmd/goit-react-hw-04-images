@@ -1,5 +1,5 @@
 import css from './StyleContainer.module.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Searchbar } from './SearchBar/Searchbar';
 import { fetchImages } from './Api/fetchImages';
@@ -18,30 +18,30 @@ export const App = () => {
   const [modalAlt, setModalAlt] = useState('');
   const [totalPages, setTotalPages] = useState(0);
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setIsLoading(true);
-    const inputForSearch = e.target.elements.inputForSearch;
-    if (inputForSearch.value.trim() === '') {
+  useEffect(() => {
+    if (currentSearch === '') {
       return;
     }
-    const response = await fetchImages(inputForSearch.value, 1);
-    setTotalPages(Math.ceil(response.totalHits / 12));
+    async function addImages() {
+      setIsLoading(true);
+      const response = await fetchImages(currentSearch, pageNr);
 
-    setImages(response.hits);
-    setIsLoading(false);
-    setCurrentSearch(inputForSearch.value);
-    setPageNr(2);
+      setImages(prevImages => [...prevImages, ...response.hits]);
+      setIsLoading(false);
+      setTotalPages(Math.ceil(response.totalHits / 12));
+      console.log(response.totalHits);
+    }
+    addImages();
+  }, [currentSearch, pageNr]);
+
+  const handleSubmit = query => {
+    setCurrentSearch(query);
+    setImages([]);
+    setPageNr(1);
   };
 
-  const handleClickMore = async () => {
-    setIsLoading({ isLoading: true });
-    const response = await fetchImages(currentSearch, pageNr);
-
-    setImages([...images, ...response.hits]);
-
-    setIsLoading(false);
-    setPageNr(pageNr + 1);
+  const handleClickMore = () => {
+    setPageNr(pageNr => pageNr + 1);
   };
 
   const handleImageClick = e => {
@@ -66,7 +66,7 @@ export const App = () => {
           <ImageGallery onImageClick={handleImageClick} images={images} />
 
           {isLoading && pageNr >= 2 ? <Loader /> : null}
-          {images.length > 0 && !isLoading && pageNr <= totalPages ? (
+          {images.length > 0 && !isLoading && pageNr < totalPages ? (
             <Button onClick={handleClickMore} />
           ) : null}
         </React.Fragment>
