@@ -29,7 +29,6 @@ export const App = () => {
       setImages(prevImages => [...prevImages, ...response.hits]);
       setIsLoading(false);
       setTotalPages(Math.ceil(response.totalHits / 12));
-      console.log(response.totalHits);
     }
     addImages();
   }, [currentSearch, pageNr]);

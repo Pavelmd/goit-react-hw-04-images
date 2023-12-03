@@ -1,5 +1,6 @@
 import css from './SearchBar.module.css';
 import { useState } from 'react';
+
 export const Searchbar = ({ onSubmit }) => {
   const [currentSearch, setCurrentSearch] = useState('');
   const handleChange = event => setCurrentSearch(event.target.value);
@@ -7,8 +8,9 @@ export const Searchbar = ({ onSubmit }) => {
   const handleSubmit = e => {
     e.preventDefault();
     const inputForSearch = e.target.elements.inputForSearch;
-    setCurrentSearch(inputForSearch.value);
-    onSubmit(currentSearch);
+
+    setCurrentSearch(inputForSearch.value.trim());
+    onSubmit(currentSearch.trim());
     e.target.reset();
   };
 
